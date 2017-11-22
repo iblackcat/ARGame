@@ -13,6 +13,9 @@ import ARKit
 class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
+    @IBOutlet var depthView: UIView!
+    
+    var cubeNode: SCNNode!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,33 +27,89 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.showsStatistics = true
         
         // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
+        let scene = SCNScene()//SCNScene(named: "art.scnassets/ship.scn")!
         
         // Set the scene to the view
         sceneView.scene = scene
         
+        addGestures()
+    }
+    
+    private func addGestures() {
         let tapGesture = UITapGestureRecognizer(target: self, action:
-            #selector(ViewController.handleTap(gestureRecognizer:)))
+            #selector(ViewController.handleTap(sender:)))
         view.addGestureRecognizer(tapGesture)
+        
+        let panGesture = UIPanGestureRecognizer(target: self, action:
+            #selector(ViewController.handlePanGesture(sender:)))
+        view.addGestureRecognizer(panGesture)
     }
     
     @objc
-    func handleTap(gestureRecognizer: UITapGestureRecognizer) {
+    func handlePanGesture(sender: UIPanGestureRecognizer) {
+        if sceneView.scene.rootNode.childNodes.count == 0 {
+            return
+        }
+        
+        let velocity = sender.velocity(in: self.view)
+        let last_scale = cubeNode.scale.x
+        
+        if velocity.y > 0 {
+            cubeNode.scale = SCNVector3(last_scale * 0.99, last_scale * 0.99, last_scale * 0.99)
+        }
+        
+        else {
+            cubeNode.scale = SCNVector3(last_scale * 1.01, last_scale * 1.01, last_scale * 1.01)
+        }
+    }
+    
+    @objc
+    func handleTap(sender: UITapGestureRecognizer) {
+        let location = sender.location(in: self.view)
+        let x = location.x / self.view.bounds.size.width
+        if (x > 0.1) {
+            return
+        }
+        
         guard let currentFrame = sceneView.session.currentFrame else {
             return
         }
         
+        
+        /*
         let imagePlane = SCNPlane(width: sceneView.bounds.width / 6000,
                                   height: sceneView.bounds.height / 6000)
-        imagePlane.firstMaterial?.diffuse.contents = sceneView.snapshot()
+        let image = sceneView.snapshot()
+        imagePlane.firstMaterial?.diffuse.contents = image
         imagePlane.firstMaterial?.lightingModel = .constant
         
         let planeNode = SCNNode(geometry: imagePlane)
         sceneView.scene.rootNode.addChildNode(planeNode)
         
+        //planeNode.eulerAngles.z = Float.pi + Float.pi / 2
+        
         var translation = matrix_identity_float4x4
         translation.columns.3.z = -0.1
         planeNode.simdTransform = matrix_multiply(currentFrame.camera.transform, translation)
+        //planeNode.simdEulerAngles = float3(0, 0, Float.pi/2)
+        */
+        
+        let cube = SCNBox(width: sceneView.bounds.height / 6000, height: sceneView.bounds.height / 6000, length: sceneView.bounds.height / 6000, chamferRadius: sceneView.bounds.height / 60000)
+        cube.firstMaterial?.diffuse.contents = UIColor.init(red: 0.75, green: 0.75, blue: 0.75, alpha: 0.5)
+        cube.firstMaterial?.lightingModel = .constant
+        
+        cubeNode = SCNNode(geometry: cube)
+        
+        if sceneView.scene.rootNode.childNodes.count > 0 {
+            sceneView.scene.rootNode.replaceChildNode(sceneView.scene.rootNode.childNodes[0], with: cubeNode)
+        }
+        else {
+            sceneView.scene.rootNode.addChildNode(cubeNode)
+        }
+        
+        var translation = matrix_identity_float4x4
+        translation.columns.3.z = -0.1
+        cubeNode.simdTransform = matrix_multiply(currentFrame.camera.transform, translation)
     }
     
     override func viewWillAppear(_ animated: Bool) {

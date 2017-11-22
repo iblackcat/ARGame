@@ -56,10 +56,10 @@
 		CB65B9611FBFD0450029D6E6 /* ARGame */ = {
 			isa = PBXGroup;
 			children = (
-				CB65B9621FBFD0450029D6E6 /* AppDelegate.swift */,
-				CB65B9641FBFD0450029D6E6 /* art.scnassets */,
 				CB65B9661FBFD0460029D6E6 /* ViewController.swift */,
 				CB65B9681FBFD0460029D6E6 /* Main.storyboard */,
+				CB65B9621FBFD0450029D6E6 /* AppDelegate.swift */,
+				CB65B9641FBFD0450029D6E6 /* art.scnassets */,
 				CB65B96B1FBFD0460029D6E6 /* Assets.xcassets */,
 				CB65B96D1FBFD0460029D6E6 /* LaunchScreen.storyboard */,
 				CB65B9701FBFD0460029D6E6 /* Info.plist */,
@@ -155,6 +155,7 @@
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
+			usesTabs = 0;
 		};
 		CB65B96D1FBFD0460029D6E6 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
